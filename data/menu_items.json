@@ -1,0 +1,32 @@
+[
+    {
+        "restaurant_name": "테스트 식당",
+        "menu_name": "테스트 비빔밥",
+        "price": 9000,
+        "allergens": [
+            "대두"
+        ],
+        "is_verified": false,
+        "source": "테스트 데이터"
+    },
+    {
+        "restaurant_name": "테스트 식당",
+        "menu_name": "테스트 비빔밥",
+        "price": 9000,
+        "allergens": [
+            "대두"
+        ],
+        "is_verified": true,
+        "source": "테스트 데이터"
+    },
+    {
+        "restaurant_name": "테스트 식당",
+        "menu_name": "테스트 비빔밥",
+        "price": 9000,
+        "allergens": [
+            "대두"
+        ],
+        "is_verified": true,
+        "source": "테스트 데이터"
+    }
+]
