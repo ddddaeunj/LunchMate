@@ -5,6 +5,7 @@ from api.kakao_api import search_restaurants
 from services.member_service import get_members_by_group
 from services.recommendation_service import evaluate_restaurants
 from services.group_service import get_group_by_id
+from streamlit_geolocation import streamlit_geolocation
 
 
 # 페이지 제목
@@ -48,25 +49,94 @@ else:
     # 식당 검색
     st.divider()
 
-    st.subheader("🔎 식당 검색")
+    
+    st.subheader("🔎 주변 식당 검색")
 
-    keyword = st.text_input(
-        "검색어",
-        placeholder="예: 금오공대 맛집"
+    location = st.text_input(
+        "검색 지역",
+        placeholder="예: 금오공과대학교"
     )
 
-    if st.button("점심 식당 검색"):
+    category = st.selectbox(
+        "음식 종류",
+        ["전체", "한식", "일식", "중식", "양식", "분식", "카페"]
+    )
 
-        if not keyword.strip():
+    if st.button("주변 식당 검색"):
 
-            st.warning("검색어를 입력해 주세요.")
+        if not location.strip():
+            st.warning("검색 지역을 입력해 주세요.")
 
         else:
-
             try:
+                if category == "전체":
+                    keyword = f"{location} 맛집"
+                else:
+                    keyword = f"{location} {category}"
 
-                # 카카오 API로 식당 검색
                 restaurants = search_restaurants(keyword)
+
+                evaluated_restaurants = evaluate_restaurants(
+                    restaurants,
+                    members
+                )
+
+                st.session_state.evaluated_restaurants = (
+                    evaluated_restaurants
+                )
+
+            except Exception as e:
+                st.error(f"식당 검색 중 오류가 발생했습니다: {e}")
+
+    # 현재 위치 가져오기
+    st.write("📍 현재 위치")
+
+    location_data = streamlit_geolocation()
+
+    latitude = None
+    longitude = None
+
+    if location_data:
+        latitude = location_data.get("latitude")
+        longitude = location_data.get("longitude")
+
+        if latitude is not None and longitude is not None:
+            st.success("현재 위치를 확인했습니다.")
+            st.write("위도:", latitude)
+            st.write("경도:", longitude)
+        else:
+            st.info("현재 위치 버튼을 눌러 위치 정보를 가져와 주세요.")
+
+    
+    if st.button("점심 식당 검색"):
+
+        if not location.strip() and (latitude is None or longitude is None):
+            st.warning("현재 위치를 확인하거나 검색 지역을 입력해 주세요.")
+
+        else:
+            try:
+                # 검색 키워드 설정
+                if location.strip():
+                    if category == "전체":
+                        keyword = f"{location} 맛집"
+                    else:
+                        keyword = f"{location} {category}"
+
+                    # 직접 입력한 지역으로 검색
+                    restaurants = search_restaurants(keyword)
+
+                else:
+                    if category == "전체":
+                        keyword = "맛집"
+                    else:
+                        keyword = category
+
+                    # 현재 위치 주변 식당 검색
+                    restaurants = search_restaurants(
+                        keyword,
+                        latitude=latitude,
+                        longitude=longitude
+                    )
 
                 # 실제 식당 정보 평가
                 evaluated_restaurants = evaluate_restaurants(
@@ -79,8 +149,8 @@ else:
                 )
 
             except Exception as e:
-
                 st.error(f"식당 검색 중 오류가 발생했습니다: {e}")
+
 
 
     # 검색 결과 표시
