@@ -1,9 +1,11 @@
+
 import sqlite3
 from pathlib import Path
 
 # 데이터베이스 파일 경로
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "data" / "lunchmate.db"
+
 
 # 데이터베이스 연결 함수
 def get_connection():
@@ -21,6 +23,7 @@ def get_connection():
 
     return conn
 
+
 # 데이터베이스 테이블 생성 함수
 def init_db():
 
@@ -33,6 +36,19 @@ def init_db():
             group_id INTEGER PRIMARY KEY AUTOINCREMENT,
             group_name TEXT NOT NULL,
             invite_code TEXT NOT NULL UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # 개인 사용자 테이블
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            budget INTEGER NOT NULL,
+            allergies TEXT DEFAULT '[]',
+            likes TEXT DEFAULT '[]',
+            dislikes TEXT DEFAULT '[]',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
